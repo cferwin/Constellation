@@ -30,6 +30,6 @@ class World
   end
 
   def create_room(name, short_desc, long_desc)
-    add_room(Room.new(0, name, short_desc, long_desc))
+    get_room(add_room(Room.new(0, name, short_desc, long_desc)))
   end
 end

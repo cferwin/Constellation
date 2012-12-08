@@ -30,9 +30,26 @@ describe Processor do
     @processor.process("hey world!").should == "Hey world!"
   end
 
+  it 'can add aliases' do
+    expect { @processor.process("h") }.to raise_error RuntimeError
+
+    @processor.add_alias(:h, :hey)
+
+    expect { @processor.process("h") }.to_not raise_error RuntimeError
+    @processor.process("h world!").should == "Hey world!"
+    expect { @processor.process("hey") }.to_not raise_error RuntimeError
+    @processor.process("hey world!").should == "Hey world!"
+  end
+
   it 'can remove commands' do
     expect { @processor.process("hey") }.to_not raise_error RuntimeError
     @processor.remove_command(:hey)
     expect { @processor.process("hey") }.to raise_error RuntimeError
+  end
+
+  it 'can remove aliases' do
+    expect { @processor.process("h") }.to_not raise_error RuntimeError
+    @processor.remove_alias(:h)
+    expect { @processor.process("h") }.to raise_error RuntimeError
   end
 end

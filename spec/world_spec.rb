@@ -15,7 +15,7 @@ describe World do
 
   it 'can create rooms' do
     @room = @world.create_room("Test Room", "A test room", "")
-    @room.should eq 1
+    @room.id.should eq 1
   end
 
   it 'can get rooms' do
