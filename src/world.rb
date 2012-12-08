@@ -1,12 +1,15 @@
 require_relative './processor'
 require_relative './room'
+require_relative './character'
 
 class World
-  attr_accessor :rooms
+  attr_accessor :rooms, :characters
 
   def initialize
     @rooms = {}
+    @characters = {}
     @max_room_id = 0
+    @max_character_id = 0
   end
 
   def get_room(id)
@@ -31,6 +34,30 @@ class World
 
   def create_room(name, short_desc, long_desc)
     get_room(add_room(Room.new(0, name, short_desc, long_desc)))
+  end
+  
+  def get_character(id)
+    if characters.has_key?(id)
+      characters[id]
+    else
+      nil
+    end
+  end
+
+  def add_character(character)
+    character.id = @max_character_id
+    @characters.store @max_character_id, character
+    @max_character_id += 1
+
+    return character.id
+  end
+
+  def remove_character(id)
+    characters.delete id
+  end
+
+  def create_character(name, short_desc, long_desc)
+    get_character(add_character(Character.new(0, name, short_desc, long_desc)))
   end
 
   def save(path)
