@@ -18,10 +18,11 @@ class World
   end
 
   def add_room(room)
+    room.id = @max_room_id
     @rooms.store @max_room_id, room
     @max_room_id += 1
 
-    return @max_room_id - 1
+    return room.id
   end
 
   def remove_room(id)
@@ -29,6 +30,6 @@ class World
   end
 
   def create_room(name, short_desc, long_desc)
-    add_room(Room.new(name, short_desc, long_desc))
+    add_room(Room.new(0, name, short_desc, long_desc))
   end
 end

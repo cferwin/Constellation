@@ -7,8 +7,10 @@ describe World do
   end
 
   it 'can add rooms' do
-    @room = @world.add_room("Test Room")
-    @room.should eq 0
+    @room = Room.new(5, "Test Room", "", "")
+    @created_room = @world.add_room(@room)
+    @room.id.should eq 0
+    @created_room.should eq @room.id
   end
 
   it 'can create rooms' do
@@ -17,7 +19,7 @@ describe World do
   end
 
   it 'can get rooms' do
-    @world.get_room(0).should eq "Test Room"
+    @world.get_room(0).name.should eq "Test Room"
     @world.get_room(1).name.should eq "Test Room"
   end
 
