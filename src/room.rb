@@ -30,4 +30,28 @@ class Room < Entity
       down
     end
   end
+
+  def get_items_by_name(name)
+    @ret = []
+
+    @items.each do |item|
+      if item.name == name
+        @ret << item
+      end
+    end
+
+    if @ret.empty?
+      nil
+    else
+      @ret
+    end
+  end
+
+  def add_item(item)
+    items << item
+  end
+
+  def remove_item(item)
+    items.delete item
+  end
 end

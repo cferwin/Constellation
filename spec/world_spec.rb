@@ -48,4 +48,23 @@ describe World do
       @world.get_character(@id).should eq nil
     end
   end
+
+  describe "Items" do
+    it 'can create items' do
+      @item = @world.create_item("Test Item", "", "")
+      @item.name.should eq "Test Item"
+    end
+
+    it 'can get items' do
+      @item = @world.create_item("Test Item", "", "")
+      @world.get_item(@item.id).name.should eq "Test Item"
+    end
+
+    it 'can delete items' do
+      @item = @world.create_item("Test Item", "", "")
+      @id = @item.id
+      @world.remove_item(@item.id)
+      @world.get_item(@id).should eq nil
+    end
+  end
 end

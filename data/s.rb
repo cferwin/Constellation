@@ -15,4 +15,6 @@ It has a second line because it's longer.")
 @north = @world.create_room("Hallway", "This is the hallway", "This is the hallway longer description")
 @room.north = @north
 @north.south = @room
+@room.items << @world.create_item("Test Item", "A test item", "A test item long desc")
+@room.items << @world.create_item("i", "A test item", "A test item long desc")
 @world

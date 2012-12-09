@@ -25,5 +25,15 @@ describe Character do
 
     @room.characters.include?(@character).should_not be_true
     @north.characters.include?(@character).should be_true
+    @character.move_to @room
+  end
+
+  it 'can take items from a container' do
+    @room.items << @world.create_item("Test Item", "", "")
+    @room.items.last.name.should eq "Test Item"
+
+    @item = @character.take_item @room, "Test Item"
+    @item.should_not be_nil
+    @character.inventory.include?(@item.first).should be_true
   end
 end

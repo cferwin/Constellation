@@ -1,17 +1,21 @@
 require_relative './processor'
 require_relative './room'
 require_relative './character'
+require_relative './item'
 
 class World
-  attr_accessor :rooms, :characters
+  attr_accessor :rooms, :characters, :items
 
   def initialize
     @rooms = {}
     @characters = {}
+    @items = {}
     @max_room_id = 0
     @max_character_id = 0
+    @max_item_id = 0
   end
 
+  # Rooms
   def get_room(id)
     if rooms.has_key?(id)
       rooms[id]
@@ -36,6 +40,7 @@ class World
     get_room(add_room(Room.new(0, name, short_desc, long_desc)))
   end
   
+  # Characters
   def get_character(id)
     if characters.has_key?(id)
       characters[id]
@@ -58,6 +63,31 @@ class World
 
   def create_character(name, short_desc, long_desc)
     get_character(add_character(Character.new(0, name, short_desc, long_desc)))
+  end
+
+  # Items
+  def get_item(id)
+    if items.has_key?(id)
+      items[id]
+    else
+      nil
+    end
+  end
+
+  def add_item(item)
+    item.id = @max_item_id
+    @items.store @max_item_id, item
+    @max_item_id += 1
+
+    return item.id
+  end
+
+  def remove_item(id)
+    @items.delete id
+  end
+
+  def create_item(name, short_desc, long_desc)
+    get_item(add_item(Item.new(0, name, short_desc, long_desc)))
   end
 
   def save(path)
@@ -107,6 +137,10 @@ class World
             @file << "@north.south = @room\n"
             @saved << room.north.id
           end
+        end
+
+        room.items.each do |item|
+          @file << "@room.items << @world.create_item(\"#{item.name}\", \"#{item.short_desc}\", \"#{item.long_desc}\")\n"
         end
 
         @saved << room.id
