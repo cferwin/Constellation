@@ -13,6 +13,7 @@ class World
     @max_room_id = 0
     @max_character_id = 0
     @max_item_id = 0
+    @saved = []
   end
 
   # Rooms
@@ -91,62 +92,106 @@ class World
   end
 
   def save(path)
-    @file = File.open(path, "w")
+    file = File.open(path, "w")
     @saved = []
 
-    @file << "require File.join(File.dirname(__FILE__), 'src/world.rb')"
-    @file << "\n"
-    @file << "@world = World.new"
+    file << "require File.join(File.dirname(__FILE__), 'src/world.rb')\n"
+    file << "@world = World.new\n"
+    file << "@ret = {}\n"
 
     @rooms.each do |id, room|
       unless @saved.include?(room.id)
-        @file << "\n"
-        @file << "# Room\n"
-        @file << "@room = @world.create_room(\"#{room.name}\", \"#{room.short_desc}\", \"#{room.long_desc}\")\n"
-        if room.south
-          unless @saved.include?(room.south.id)
-            @file << "@south = @world.create_room(\"#{room.south.name}\", \"#{room.south.short_desc}\", \"#{room.south.long_desc}\")\n"
-            @file << "@room.south = @south\n"
-            @file << "@south.north = @room\n"
-            @saved << room.south.id
-          end
-        end
-
-        if room.west
-          unless @saved.include?(room.west.id)
-            @file << "@west = @world.create_room(\"#{room.west.name}\", \"#{room.west.short_desc}\", \"#{room.west.long_desc}\")\n"
-            @file << "@room.west = @west\n"
-            @file << "@west.east = @room\n"
-            @saved << room.west.id
-          end
-        end
-
-        if room.east
-          unless @saved.include?(room.east.id)
-            @file << "@east = @world.create_room(\"#{room.east.name}\", \"#{room.east.short_desc}\", \"#{room.east.long_desc}\")\n"
-            @file << "@room.east = @east\n"
-            @file << "@east.west = @room\n"
-            @saved << room.east.id
-          end
-        end
-
-        if room.north
-          unless @saved.include?(room.north.id)
-            @file << "@north = @world.create_room(\"#{room.north.name}\", \"#{room.north.short_desc}\", \"#{room.north.long_desc}\")\n"
-            @file << "@room.north = @north\n"
-            @file << "@north.south = @room\n"
-            @saved << room.north.id
-          end
-        end
-
-        room.items.each do |item|
-          @file << "@room.items << @world.create_item(\"#{item.name}\", \"#{item.short_desc}\", \"#{item.long_desc}\")\n"
-        end
-
+        file << "\n"
         @saved << room.id
+        file << save_room(room)
       end
     end
 
-    @file << "@world"
+    file << "@ret.store :world, @world\n"
+    file << "@ret\n"
+  end
+
+  private
+  def save_room(room)
+    file = String.new
+    file << "\n# SAVING ROOM #{room.id}\n"
+    file << "# Room\n"
+    if @saved.include? room.id
+      file << "@room = #{create_room_string room}\n"
+    else
+      file << "@room = @world.get_room #{room.id}\n"
+      @saved << room.id
+    end
+
+    unless room.items.empty?
+      file << "\n# Room #{room.id} Items\n"
+      room.items.each do |item|
+        file << "@room.items << #{create_item_string item}\n"
+      end
+    end
+
+    unless room.characters.empty?
+      file << "\n# Room #{room.id} Characters\n"
+      room.characters.each do |character|
+        file << "#{save_character(character)}\n"
+      end
+    end
+
+    opposite = {north: :south, south: :north, west: :east, east: :west}
+    {north: room.north, west: room.west, south: room.south, east: room.east}.each do |dir, obj|
+      if obj
+        unless @saved.include? obj.id
+          file << "@room.#{dir} = #{create_room_string obj}\n"
+          file << "@room.#{dir}.#{opposite[dir]} = @world.get_room #{room.id}\n"
+          unless obj.items.empty?
+            file << "\n# Room #{obj.id} Items\n"
+            obj.items.each do |item|
+              file << "@room.#{dir}.items << #{create_item_string item}\n"
+            end
+          end
+
+          unless obj.characters.empty?
+            file << "\n# Room #{obj.id} Characters\n"
+            obj.characters.each do |character|
+              file << "#{save_character(character)}\n"
+            end
+          end
+          @saved << obj.id
+        else
+          file << "@room.#{dir} = @world.get_room #{obj.id}\n"
+          file << "@room.#{dir}.#{opposite[dir]} = @world.get_room @room.id\n"
+          file << "@room = @world.get_room #{room.id}\n"
+        end
+      end
+    end
+
+    file << "\n# SAVED ROOM #{room.id}\n"
+    file
+  end
+
+  def create_room_string(room)
+    "@world.create_room(\"#{room.name}\", \"#{room.short_desc}\", \"#{room.long_desc}\")"
+  end
+
+  def save_character(character)
+    file = String.new
+    file << "@character = @world.create_character(\"#{character.name}\", \"#{character.short_desc}\", \"#{character.long_desc}\")\n"
+    file << "@character.location = @world.get_room #{character.location.id}\n"
+
+    character.inventory.each do |item|
+      file << "@character.inventory << #{create_item_string item}\n"
+    end
+
+    file << "@character.location.characters << @character\n"
+
+    if character.player
+      file << "@ret.store :player, @character\n"
+    end
+
+    file
+  end
+
+  def create_item_string(item)
+    "@world.create_item(\"#{item.name}\", \"#{item.short_desc}\", \"#{item.long_desc}\")"
   end
 end

@@ -1,7 +1,7 @@
 require_relative './entity'
 
 class Character < Entity
-  attr_accessor :inventory, :health, :location
+  attr_accessor :inventory, :health, :location, :player
 
   def initialize(id, name, short_desc, long_desc)
     @id = id
@@ -10,6 +10,7 @@ class Character < Entity
     @long_desc = long_desc
     @inventory = []
     @health = 100
+    @player = false
   end
 
   def move_to(room)

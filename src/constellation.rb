@@ -3,14 +3,25 @@ require_relative './world.rb'
 require 'smart_colored/extend'
 
 # Define world
-@world = eval(File.read("/home/chris/prog/constellation/data/s.rb"))
+@file = eval(File.read("/home/chris/prog/constellation/data/s.rb"))
+@world = @file[:world]
+@player = @file[:player]
 
-#@player.location = @world.create_room("Entrance", "This is the entrance", "This is the entrace to the game.\nIt has a second line because it's longer.")
-#@player.location.north = @world.create_room("Hallway", "This is the hallway", "This is the hallway longer description")
-#@world.get_room(1).south = @player.location
+#@world = World.new
+#@player = @world.create_character("Player", "The player.", "This is the player.")
 
-@player = @world.create_character("Player", "The player.", "This is the player.")
-@player.move_to(@world.get_room(0))
+#@room = @world.create_room("Entrance", "This is the entrance", "This is the entrace to the game.\nIt has a second line because it's longer.")
+#@room.north = @world.create_room("Hallway", "This is the hallway", "This is the hallway longer description")
+#@room.north.south = @room
+#@room.south = @world.create_room("South Gate", "This is the South Gate", "This is the South Gate.\nIt has a second line because it's longer.")
+#@room.south.north = @room
+#@room.east = @world.create_room("East Gate", "This is the East Gate", "This is the East Gate.\nIt has a second line because it's longer.")
+#@room.east.west = @room
+#@room.west = @world.create_room("West Gate", "This is the West Gate", "This is the West Gate.\nIt has a second line because it's longer.")
+#@room.west.east = @room
+
+#@player.move_to(@world.get_room(0))
+@player.player = true
 
 #@player.location.items << @world.create_item("Test Item", "A test item", "A test item long desc")
 #@player.location.items << @world.create_item("i", "A test item", "A test item long desc")
