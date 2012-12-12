@@ -34,5 +34,16 @@ It has a second line because it's longer.")
 
 
 # SAVED ROOM 0
+
+
+# SAVING ROOM 5
+# Room
+@room = @world.create_room("Test Room
+", "", "")
+@room.west = @world.get_room 4
+@room.west.east = @world.get_room @room.id
+@room = @world.get_room 5
+
+# SAVED ROOM 5
 @ret.store :world, @world
 @ret

@@ -6,26 +6,7 @@ require 'smart_colored/extend'
 @file = eval(File.read("/home/chris/prog/constellation/data/s.rb"))
 @world = @file[:world]
 @player = @file[:player]
-
-#@world = World.new
-#@player = @world.create_character("Player", "The player.", "This is the player.")
-
-#@room = @world.create_room("Entrance", "This is the entrance", "This is the entrace to the game.\nIt has a second line because it's longer.")
-#@room.north = @world.create_room("Hallway", "This is the hallway", "This is the hallway longer description")
-#@room.north.south = @room
-#@room.south = @world.create_room("South Gate", "This is the South Gate", "This is the South Gate.\nIt has a second line because it's longer.")
-#@room.south.north = @room
-#@room.east = @world.create_room("East Gate", "This is the East Gate", "This is the East Gate.\nIt has a second line because it's longer.")
-#@room.east.west = @room
-#@room.west = @world.create_room("West Gate", "This is the West Gate", "This is the West Gate.\nIt has a second line because it's longer.")
-#@room.west.east = @room
-
-#@player.move_to(@world.get_room(0))
 @player.player = true
-
-#@player.location.items << @world.create_item("Test Item", "A test item", "A test item long desc")
-#@player.location.items << @world.create_item("i", "A test item", "A test item long desc")
-#@player.location.items << @world.create_item("i", "A test item", "A test item long desc")
 
 # Define commands
 @cmd = Processor.new
@@ -45,6 +26,14 @@ def aoran(t)
     "a #{t}!"
   end
 end
+
+@cmd.add_command :create_room, lambda { |t|
+    print "Name: "
+    name = gets
+    nr = @world.create_room(name, "", "")
+    @player.location.east = nr
+    nr.west = @player.location
+  }
 
 @cmd.add_command :look, lambda { |t|
     puts("#{@player.location.name}".bold + "\n\n#{@player.location.long_desc}\n\n")
@@ -199,9 +188,8 @@ end
 @cmd.add_alias :q, :quit
 
 while true do
-  STDOUT << "> "
+  print "> "
   @line = gets.chomp
-  #@line = STDIN.readline
 
   begin
     @cmd.process @line

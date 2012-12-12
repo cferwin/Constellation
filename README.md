@@ -7,6 +7,7 @@ Constellation is a text-based game engine written in Ruby.
 Dependencies
 ------------
 * Rspec for running tests in /spec
+* Smart\_colored for text formatting
 
 License
 -------
