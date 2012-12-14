@@ -17,7 +17,7 @@ describe Character do
 
   it 'can move in a direction' do
     @north = @world.create_room("North", "", "")
-    @room.north = @north
+    @room.set_exit :north, @north
 
     @character.location.should eq @room
     @character.move :north

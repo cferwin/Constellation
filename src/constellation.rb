@@ -27,12 +27,23 @@ def aoran(t)
   end
 end
 
-@cmd.add_command :create_room, lambda { |t|
-    print "Name: "
-    name = gets
-    nr = @world.create_room(name, "", "")
-    @player.location.east = nr
-    nr.west = @player.location
+@cmd.add_command :create, lambda { |t|
+    if t[0] == "room"
+      print "Name: "
+      name = gets
+
+      print "Short Description: "
+      short_desc = gets
+
+      print "Long Description: "
+      long_desc = gets
+
+      nr = @world.create_room(name, short_desc, long_desc)
+      @player.location.connect_room(t[1].to_sym, nr, t[2].to_sym)
+      return
+    end
+
+    puts "I don't know how to create #{aoran t.join(" ")}!"
   }
 
 @cmd.add_command :look, lambda { |t|

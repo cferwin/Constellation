@@ -102,8 +102,8 @@ class World
     @rooms.each do |id, room|
       unless @saved.include?(room.id)
         file << "\n"
-        @saved << room.id
         file << save_room(room)
+        @saved << room.id
       end
     end
 
@@ -112,17 +112,21 @@ class World
   end
 
   private
-  def save_room(room)
+  def save_room(room, last = {})
     file = String.new
-    file << "\n# SAVING ROOM #{room.id}\n"
+
+    file << "\n# SAVING ROOM #{room.id}:#{last[:direction]}:#{room.name}\n"
     file << "# Room\n"
-    if @saved.include? room.id
+
+    # Create the room or get the object
+    unless @saved.include? room.id
       file << "@room = #{create_room_string room}\n"
+      @saved << room.id
     else
       file << "@room = @world.get_room #{room.id}\n"
-      @saved << room.id
     end
 
+    # Save room items
     unless room.items.empty?
       file << "\n# Room #{room.id} Items\n"
       room.items.each do |item|
@@ -130,6 +134,7 @@ class World
       end
     end
 
+    # Save room characters
     unless room.characters.empty?
       file << "\n# Room #{room.id} Characters\n"
       room.characters.each do |character|
@@ -137,32 +142,21 @@ class World
       end
     end
 
-    opposite = {north: :south, south: :north, west: :east, east: :west}
-    {north: room.north, west: room.west, south: room.south, east: room.east}.each do |dir, obj|
-      if obj
-        unless @saved.include? obj.id
-          file << "@room.#{dir} = #{create_room_string obj}\n"
-          file << "@room.#{dir}.#{opposite[dir]} = @world.get_room #{room.id}\n"
-          unless obj.items.empty?
-            file << "\n# Room #{obj.id} Items\n"
-            obj.items.each do |item|
-              file << "@room.#{dir}.items << #{create_item_string item}\n"
-            end
-          end
-
-          unless obj.characters.empty?
-            file << "\n# Room #{obj.id} Characters\n"
-            obj.characters.each do |character|
-              file << "#{save_character(character)}\n"
-            end
-          end
-          @saved << obj.id
-        else
-          file << "@room.#{dir} = @world.get_room #{obj.id}\n"
-          file << "@room.#{dir}.#{opposite[dir]} = @world.get_room @room.id\n"
-          file << "@room = @world.get_room #{room.id}\n"
-        end
+    # Step through the exit network
+    room.exits.each do |dir, obj|
+      unless @saved.include? obj.id
+        file << save_room(obj, {direction: dir, room: obj})
+        file << "@room = @world.get_room #{room.id}\n"
+        file << "@room.exits[:#{dir}] = @world.get_room #{obj.id}\n"
+        @saved << obj.id
+      else
+        file << "@room = @world.get_room #{room.id}\n"
+        file << "@room.exits[:#{dir}] = @world.get_room #{obj.id}\n"
       end
+    end
+
+    unless last.empty?
+      save_room last[:room]
     end
 
     file << "\n# SAVED ROOM #{room.id}\n"

@@ -1,7 +1,7 @@
 require_relative './entity'
 
 class Room < Entity
-  attr_accessor :characters, :items, :north, :east, :south, :west, :up, :down
+  attr_accessor :characters, :items, :exits
 
   def initialize(id, name, short_desc, long_desc)
     @id = id
@@ -10,25 +10,20 @@ class Room < Entity
     @long_desc = long_desc
     @characters = []
     @items = []
+    @exits = {}
+  end
+
+  def set_exit(direction, room)
+    exits[direction] = room
+  end
+
+  def connect_room(direction, room, opposite_direction)
+    exits[direction] = room
+    room.set_exit[opposite_direction] = self
   end
 
   def get_exit(direction)
-    case
-    when direction == :north
-      north
-    when direction == :east
-      east
-    when direction == :south
-      south
-    when direction == :west
-      west
-    when direction == :north
-      north
-    when direction == :up
-      up
-    when direction == :down
-      down
-    end
+    exits[direction]
   end
 
   def get_items_by_name(name)
