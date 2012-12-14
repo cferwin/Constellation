@@ -10,13 +10,25 @@ describe World do
     it 'can add rooms' do
       @room = Room.new(5, "Test Room", "", "")
       @created_room = @world.add_room(@room)
-      @room.id.should eq 0
+      @room.id.should eq 5
       @created_room.should eq @room.id
     end
 
     it 'can create rooms' do
-      @room = @world.create_room("Test Room", "A test room", "")
+      @room = @world.create_room(1, "Test Room", "A test room", "")
       @room.id.should eq 1
+    end
+
+    it 'can create rooms and find a free id' do
+      @world.rooms.clear
+
+      @world.create_room(0, "Test Room", "A test room", "")
+      @world.create_room(1, "Test Room", "A test room", "")
+      @world.create_room(2, "Test Room", "A test room", "")
+
+      @room = @world.create_room("Test Room", "A test room", "")
+
+      @room.id.should eq 3
     end
 
     it 'can get rooms' do

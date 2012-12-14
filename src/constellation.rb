@@ -30,15 +30,27 @@ end
 @cmd.add_command :create, lambda { |t|
     if t[0] == "room"
       print "Name: "
-      name = gets
+      name = gets.chomp
 
       print "Short Description: "
-      short_desc = gets
+      short_desc = gets.chomp
 
       print "Long Description: "
-      long_desc = gets
+      long_desc = gets.chomp
 
       nr = @world.create_room(name, short_desc, long_desc)
+      @player.location.connect_room(t[1].to_sym, nr, t[2].to_sym)
+      return
+    end
+
+    if t[0] == "library"
+      nr = @world.create_room("Library", "This room has many bookshelves in it.", "There are many bookshelves in this room. The rows must be thirty feet long. There seems to be a space between one of the shelves and the floor.")
+      @player.location.connect_room(t[1].to_sym, nr, t[2].to_sym)
+      return
+    end
+
+    if t[0] == "crawlspace"
+      nr = @world.create_room("Crawlspace", "A small space below the shelves.", "The air in this tiny space is dusty, but it smells of leather and old paper.")
       @player.location.connect_room(t[1].to_sym, nr, t[2].to_sym)
       return
     end
@@ -60,10 +72,8 @@ end
 
     # List exits
     puts  "You can exit:"
-    [:north, :south, :east, :west, :up, :down].each do |direction|
-      if @player.location.get_exit direction
-        print("#{direction} ".bold)
-      end
+    @player.location.exits.each do |direction, room|
+      print("#{direction.to_s} ".bold)
     end
     puts
   }
@@ -195,8 +205,11 @@ end
   }
 @cmd.add_alias :d, :down
 
-@cmd.add_command :quit, lambda { |t| @world.save(File.join(File.dirname(__FILE__), "../data/s.rb")) and exit }
-@cmd.add_alias :q, :quit
+@cmd.add_command :quit, method(:exit)
+
+@cmd.add_command :save, lambda { |t| @world.save(File.join(File.dirname(__FILE__), "../data/s.rb")) and exit }
+@cmd.add_alias :sq, :save
+@cmd.add_alias :q, :sq
 
 while true do
   print "> "
@@ -205,6 +218,10 @@ while true do
   begin
     @cmd.process @line
   rescue RuntimeError
-    puts "Command Unknown"
+    if @player.location.get_exit @line.to_sym
+      move @line.to_sym
+    else
+      puts "Command Unknown"
+    end
   end
 end

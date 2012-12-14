@@ -10,9 +10,6 @@ class World
     @rooms = {}
     @characters = {}
     @items = {}
-    @max_room_id = 0
-    @max_character_id = 0
-    @max_item_id = 0
     @saved = []
   end
 
@@ -26,9 +23,7 @@ class World
   end
 
   def add_room(room)
-    room.id = @max_room_id
-    @rooms.store @max_room_id, room
-    @max_room_id += 1
+    @rooms.store room.id, room
 
     return room.id
   end
@@ -37,8 +32,13 @@ class World
     rooms.delete id
   end
 
-  def create_room(name, short_desc, long_desc)
-    get_room(add_room(Room.new(0, name, short_desc, long_desc)))
+  def create_room(id = 0, name, short_desc, long_desc)
+    while get_room(id) != nil
+      # Try to find a free ID for the room
+      id += 1
+    end
+
+    get_room(add_room(Room.new(id, name, short_desc, long_desc)))
   end
   
   # Characters
@@ -51,9 +51,7 @@ class World
   end
 
   def add_character(character)
-    character.id = @max_character_id
-    @characters.store @max_character_id, character
-    @max_character_id += 1
+    @characters.store character.id, character
 
     return character.id
   end
@@ -62,7 +60,12 @@ class World
     characters.delete id
   end
 
-  def create_character(name, short_desc, long_desc)
+  def create_character(id = 0, name, short_desc, long_desc)
+    while get_character(id) != nil
+      # Try to find a free ID
+      id += 1
+    end
+
     get_character(add_character(Character.new(0, name, short_desc, long_desc)))
   end
 
@@ -76,9 +79,7 @@ class World
   end
 
   def add_item(item)
-    item.id = @max_item_id
-    @items.store @max_item_id, item
-    @max_item_id += 1
+    @items.store item.id, item
 
     return item.id
   end
@@ -87,7 +88,12 @@ class World
     @items.delete id
   end
 
-  def create_item(name, short_desc, long_desc)
+  def create_item(id = 0, name, short_desc, long_desc)
+    while get_item(id) != nil
+      # Try to find a free ID
+      id += 1
+    end
+
     get_item(add_item(Item.new(0, name, short_desc, long_desc)))
   end
 
@@ -121,6 +127,7 @@ class World
     # Create the room or get the object
     unless @saved.include? room.id
       file << "@room = #{create_room_string room}\n"
+      file << "@room.id = #{room.id}\n"
       @saved << room.id
     else
       file << "@room = @world.get_room #{room.id}\n"
@@ -164,7 +171,7 @@ class World
   end
 
   def create_room_string(room)
-    "@world.create_room(\"#{room.name}\", \"#{room.short_desc}\", \"#{room.long_desc}\")"
+    "@world.create_room(#{room.id}, \"#{room.name}\", \"#{room.short_desc}\", \"#{room.long_desc}\")"
   end
 
   def save_character(character)

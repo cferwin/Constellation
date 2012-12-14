@@ -19,7 +19,7 @@ class Room < Entity
 
   def connect_room(direction, room, opposite_direction)
     exits[direction] = room
-    room.set_exit[opposite_direction] = self
+    room.exits[opposite_direction] = self
   end
 
   def get_exit(direction)
