@@ -11,11 +11,41 @@ require 'smart_colored/extend'
 # Define commands
 @cmd = Processor.new
 
+def expand_direction(direction)
+  case direction
+    when :n
+      direction = :north
+    when :s
+      direction = :south
+    when :e
+      direction = :east
+    when :w
+      direction = :west
+    when :u
+      direction = :up
+    when :d
+      direction = :down
+  end
+
+  direction
+end
+
+# To display "can't go..." message when the player is using a standard direction
+def is_direction(direction)
+  if [:north, :south, :east, :west, :up, :down].include?(expand_direction(direction))
+    direction
+  else
+    nil
+  end
+end
+
 def move(direction)
-  if @player.move direction
+  if @player.move(expand_direction(direction))
     @cmd.process("look")
+    @player.location
   else
     puts "You can't go that way!"
+    nil
   end
 end
 
@@ -138,7 +168,7 @@ end
 @cmd.add_command :drop, lambda { |t|
     # No item name given
     if t.empty?
-      puts "Take what?"
+      puts "Drop what?"
       return
     end
 
@@ -175,37 +205,7 @@ end
   }
 @cmd.add_alias :d, :drop
 
-@cmd.add_command :north, lambda { |t|
-    move :north
-  }
-@cmd.add_alias :n, :north
-
-@cmd.add_command :south, lambda { |t|
-    move :south
-  }
-@cmd.add_alias :s, :south
-
-@cmd.add_command :west, lambda { |t|
-    move :west
-  }
-@cmd.add_alias :w, :west
-
-@cmd.add_command :east, lambda { |t|
-    move :east
-  }
-@cmd.add_alias :e, :east
-
-@cmd.add_command :up, lambda { |t|
-    move :up
-  }
-@cmd.add_alias :u, :up
-
-@cmd.add_command :down, lambda { |t|
-    move :down
-  }
-@cmd.add_alias :d, :down
-
-@cmd.add_command :quit, method(:exit)
+@cmd.add_command :quit, lambda { |t| exit }
 
 @cmd.add_command :save, lambda { |t| @world.save(File.join(File.dirname(__FILE__), "../data/s.rb")) and exit }
 @cmd.add_alias :sq, :save
@@ -218,7 +218,7 @@ while true do
   begin
     @cmd.process @line
   rescue RuntimeError
-    if @player.location.get_exit @line.to_sym
+    if @player.location.get_exit(expand_direction(@line.to_sym)) || is_direction(expand_direction(@line.to_sym))
       move @line.to_sym
     else
       puts "Command Unknown"
