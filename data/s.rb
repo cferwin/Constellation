@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'src/world.rb')
+require File.join(File.dirname(__FILE__), './world.rb')
 @world = World.new
 @ret = {}
 
