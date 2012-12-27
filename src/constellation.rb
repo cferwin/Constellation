@@ -1,5 +1,8 @@
 require_relative './processor.rb'
 require_relative './world.rb'
+if ENV["os"] == "Windows_NT"
+  require 'win32console'
+end
 require 'smart_colored/extend'
 
 # Load the world
@@ -16,7 +19,7 @@ else
     print "> ".red.bold
     @path = $stdin.gets.chomp
     begin
-      @file = eval(File.read(File.join(File.dirname(__FILE__), path)))
+      @file = eval(File.read(File.join(File.dirname(__FILE__), @path)))
       @world = @file[:world]
       @player = @file[:player]
       @player.player = true
