@@ -4,7 +4,7 @@ require_relative '../src/processor'
 describe Processor do
   before :all do
     @processor = Processor.new
-    @processor.add_command("hello", lambda { |t| "Hello #{t.join(" ")}".strip })
+    @processor.add_command("hello", &lambda { |t| "Hello #{t.join(" ")}".strip })
   end
 
   # Calling commands
@@ -24,7 +24,7 @@ describe Processor do
   it 'can add commands' do
     expect { @processor.process("hey") }.to raise_error RuntimeError
 
-    @processor.add_command("hey", lambda { |t| "Hey #{t.join(" ")}".strip })
+    @processor.add_command("hey", &lambda { |t| "Hey #{t.join(" ")}".strip })
 
     expect { @processor.process("hey") }.to_not raise_error RuntimeError
     @processor.process("hey world!").should == "Hey world!"

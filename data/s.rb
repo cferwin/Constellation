@@ -1,110 +1,65 @@
-require File.join(File.dirname(__FILE__), './world.rb')
-@world = World.new
-@ret = {}
-
-
-# SAVING ROOM 0::Entrance
-# Room
-@room = @world.create_room(0, "Entrance", "This is the entrance", "This is the entrace to the game.
-It has a second line because it's longer.")
-@room.id = 0
+room "Road" do
+	@id = 0
+	@short_desc = "You're standing at the end of a road..."
+	@long_desc = "You're standing at the end of a road..."
 
 # Room 0 Items
-@room.items << @world.create_item("i", "A test item", "A test item long desc")
-@room.items << @world.create_item("i", "A test item", "A test item long desc")
+	item "Bread" do
+		@id = 0
+		@short_desc = "A piece of bread."
+		@long_desc = "A regular sized slice of bread. It looks pretty fresh."
+	end
 
-# Room 0 Characters
-@character = @world.create_character("Player", "The player.", "This is the player.")
-@character.location = @world.get_room 0
-@character.location.characters << @character
-@ret.store :player, @character
+	item "Water" do
+		@id = 0
+		@short_desc = "A bottle of water."
+		@long_desc = "A liter of water in a stainless steel bottle."
+	end
 
 
-# SAVING ROOM 1:north:Hallway
-# Room
-@room = @world.create_room(1, "Hallway", "This is the hallway", "This is the hallway longer description")
-@room.id = 1
-@room = @world.get_room 1
-@room.exits[:south] = @world.get_room 0
+	# Room 0 Characters
+	character "Test Player" do
+		@id = 0
+		@short_desc = "The player's description"
+		@long_desc = "The player's long description"
 
-# SAVING ROOM 6:east:Library
-# Room
-@room = @world.create_room(6, "Library", "This room has many bookshelves in it.", "There are many bookshelves in this room. The rows must be thirty feet long. There seems to be a space between one of the shelves and the floor.")
-@room.id = 6
-@room = @world.get_room 6
-@room.exits[:west] = @world.get_room 1
+	# Inventory Items
+	item "Journal" do
+		@id = 0
+		@short_desc = "The player's journal."
+		@long_desc = "The player's journal."
+	end
 
-# SAVING ROOM 7:below:Crawlspace
-# Room
-@room = @world.create_room(7, "Crawlspace", "A small space below the shelves.", "The air in this tiny space is dusty, but it smells of leather and old paper.")
-@room.id = 7
-@room = @world.get_room 7
-@room.exits[:out] = @world.get_room 6
+	item "Pen" do
+		@id = 0
+		@short_desc = "A pen."
+		@long_desc = "A nice pen."
+	end
 
-# SAVED ROOM 7
-@room = @world.get_room 6
-@room.exits[:below] = @world.get_room 7
+	end
 
-# SAVED ROOM 6
-@room = @world.get_room 1
-@room.exits[:east] = @world.get_room 6
+	character "" do
+		@id = 0
+		@short_desc = ""
+		@long_desc = ""
+	end
 
-# SAVED ROOM 1
-@room = @world.get_room 0
-@room.exits[:north] = @world.get_room 1
+	set_exit :north, 1
+end
 
-# SAVING ROOM 2:west:West Gate
-# Room
-@room = @world.create_room(2, "West Gate", "This is the West Gate", "This is the West Gate.
-It has a second line because it's longer.")
-@room.id = 2
-@room = @world.get_room 2
-@room.exits[:east] = @world.get_room 0
+room "North Hall" do
+	@id = 1
+	@short_desc = "You're standing at the end of a road..."
+	@long_desc = "You're standing at the end of a road..."
 
-# SAVED ROOM 2
-@room = @world.get_room 0
-@room.exits[:west] = @world.get_room 2
+	# Room 1 Characters
+	character "" do
+		@id = 0
+		@short_desc = ""
+		@long_desc = ""
+	end
 
-# SAVING ROOM 3:south:South Gate
-# Room
-@room = @world.create_room(3, "South Gate", "This is the South Gate", "This is the South Gate.
-It has a second line because it's longer.")
-@room.id = 3
-@room = @world.get_room 3
-@room.exits[:north] = @world.get_room 0
+	set_exit :south, 0
+end
 
-# SAVED ROOM 3
-@room = @world.get_room 0
-@room.exits[:south] = @world.get_room 3
-
-# SAVING ROOM 4:east:East Gate
-# Room
-@room = @world.create_room(4, "East Gate", "This is the East Gate", "This is the East Gate.
-It has a second line because it's longer.")
-@room.id = 4
-
-# Room 4 Items
-@room.items << @world.create_item("Test Item", "A test item", "A test item long desc")
-@room = @world.get_room 4
-@room.exits[:west] = @world.get_room 0
-
-# SAVING ROOM 5:east:Test Room
-
-# Room
-@room = @world.create_room(5, "Test Room
-", "", "")
-@room.id = 5
-@room = @world.get_room 5
-@room.exits[:west] = @world.get_room 4
-
-# SAVED ROOM 5
-@room = @world.get_room 4
-@room.exits[:east] = @world.get_room 5
-
-# SAVED ROOM 4
-@room = @world.get_room 0
-@room.exits[:east] = @world.get_room 4
-
-# SAVED ROOM 0
-@ret.store :world, @world
-@ret
+@player.location = get_room(0)

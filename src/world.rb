@@ -2,18 +2,61 @@ require_relative './processor'
 require_relative './room'
 require_relative './character'
 require_relative './item'
+if ENV["os"] == "Windows_NT"
+  require 'win32console'
+end
+require 'smart_colored/extend'
 
 class World
-  attr_accessor :rooms, :characters, :items
+  attr_accessor :rooms, :characters, :items, :player
 
-  def initialize
+  def initialize(path = nil)
+    @path = path
     @rooms = {}
     @characters = {}
     @items = {}
     @saved = []
+    @player = Character.new(0, "", "", "")
+
+    if path
+      instance_eval(File.read(File.join(File.dirname(__FILE__), path)))
+    end
+
+    # Find the player
+    @rooms.each do |id, room|
+      room.characters.each do |char|
+        if char.player
+          char.location = @player.location
+          @player = char
+        end
+      end
+    end
+
+    # Try to get room objects for exits if they're IDs
+    @rooms.each do |id, room|
+      room.exits.each do |dir, obj|
+        if get_room obj
+          room.set_exit(dir, get_room(obj))
+        end
+      end
+    end
   end
 
   # Rooms
+  def room(name, &block)
+    id = 0
+    # Try to find a free ID for the room
+    while get_room(id) != nil
+      id += 1
+    end
+
+    room = Room.new(id, name, "", "")
+    room.load(&block)
+
+    add_room(room)
+    room
+  end
+
   def get_room(id)
     if rooms.has_key?(id)
       rooms[id]
@@ -97,102 +140,97 @@ class World
     get_item(add_item(Item.new(0, name, short_desc, long_desc)))
   end
 
-  def save(path)
-    file = File.open(path, "w")
-    @saved = []
-
-    file << "require File.join(File.dirname(__FILE__), 'src/world.rb')\n"
-    file << "@world = World.new\n"
-    file << "@ret = {}\n"
+  def save(path = nil)
+    if path
+      file = File.open(path, "w")
+    else
+      if @path
+        file = File.open(@path, "w")
+      else
+        puts "ERROR: Could not find the world save file. Please retry with a file path".bold.red
+        return
+      end
+    end
 
     @rooms.each do |id, room|
       unless @saved.include?(room.id)
-        file << "\n"
-        file << save_room(room)
+        file.write save_room(room)
         @saved << room.id
       end
     end
 
-    file << "@ret.store :world, @world\n"
-    file << "@ret\n"
+    file.write "@player.location = get_room(#{@player.location.id})"
   end
 
   private
-  def save_room(room, last = {})
-    file = String.new
-
-    file << "\n# SAVING ROOM #{room.id}:#{last[:direction]}:#{room.name}\n"
-    file << "# Room\n"
-
+  def save_room(room)
+    string = String.new
     # Create the room or get the object
     unless @saved.include? room.id
-      file << "@room = #{create_room_string room}\n"
-      file << "@room.id = #{room.id}\n"
+      string << "room \"#{room.name}\" do\n"
+        string << "\t@id = #{room.id}\n"
+        string << "\t@short_desc = \"#{room.short_desc}\"\n"
+        string << "\t@long_desc = \"#{room.long_desc}\"\n"
       @saved << room.id
-    else
-      file << "@room = @world.get_room #{room.id}\n"
-    end
 
-    # Save room items
-    unless room.items.empty?
-      file << "\n# Room #{room.id} Items\n"
-      room.items.each do |item|
-        file << "@room.items << #{create_item_string item}\n"
+      # Save room items
+      unless room.items.empty?
+        string << "\n# Room #{room.id} Items\n"
+        room.items.each do |item|
+          string << "#{save_item(item)}"
+        end
       end
-    end
 
-    # Save room characters
-    unless room.characters.empty?
-      file << "\n# Room #{room.id} Characters\n"
-      room.characters.each do |character|
-        file << "#{save_character(character)}\n"
+      # Save room characters
+      unless room.characters.empty?
+        string << "\n\t# Room #{room.id} Characters\n"
+        room.characters.each do |character|
+          string << "#{save_character(character)}\n"
+        end
       end
-    end
 
-    # Step through the exit network
-    room.exits.each do |dir, obj|
-      unless @saved.include? obj.id
-        file << save_room(obj, {direction: dir, room: obj})
-        file << "@room = @world.get_room #{room.id}\n"
-        file << "@room.exits[:#{dir}] = @world.get_room #{obj.id}\n"
-        @saved << obj.id
-      else
-        file << "@room = @world.get_room #{room.id}\n"
-        file << "@room.exits[:#{dir}] = @world.get_room #{obj.id}\n"
+      room.exits.each do |dir, obj|
+        string << "\tset_exit :#{dir}, #{obj.id}\n"
       end
+
+      string << "end\n\n"
     end
-
-    unless last.empty?
-      save_room last[:room]
-    end
-
-    file << "\n# SAVED ROOM #{room.id}\n"
-    file
-  end
-
-  def create_room_string(room)
-    "@world.create_room(#{room.id}, \"#{room.name}\", \"#{room.short_desc}\", \"#{room.long_desc}\")"
+    string
   end
 
   def save_character(character)
-    file = String.new
-    file << "@character = @world.create_character(\"#{character.name}\", \"#{character.short_desc}\", \"#{character.long_desc}\")\n"
-    file << "@character.location = @world.get_room #{character.location.id}\n"
+    string = String.new
 
-    character.inventory.each do |item|
-      file << "@character.inventory << #{create_item_string item}\n"
+    string << "\tcharacter \"#{character.name}\" do\n"
+      if character.player
+        string << "\t\tplayer = true\n"
+      end
+      string << "\t\t@id = #{character.id}\n"
+      string << "\t\t@short_desc = \"#{character.short_desc}\"\n"
+      string << "\t\t@long_desc = \"#{character.long_desc}\"\n"
+
+    # Save inventory items
+    unless character.inventory.empty?
+      string << "\n\t# Inventory Items\n"
+      character.inventory.each do |item|
+        string << "#{save_item(item)}"
+      end
     end
 
-    file << "@character.location.characters << @character\n"
+    string << "\tend\n"
 
-    if character.player
-      file << "@ret.store :player, @character\n"
-    end
-
-    file
+    string
   end
 
-  def create_item_string(item)
-    "@world.create_item(\"#{item.name}\", \"#{item.short_desc}\", \"#{item.long_desc}\")"
+  def save_item(item)
+    string = String.new
+
+    string << "\titem \"#{item.name}\" do\n"
+      string << "\t\t@id = #{item.id}\n"
+      string << "\t\t@short_desc = \"#{item.short_desc}\"\n"
+      string << "\t\t@long_desc = \"#{item.long_desc}\"\n"
+    string << "\tend\n\n"
+    
+    string
   end
 end

@@ -13,6 +13,17 @@ class Character < Entity
     @player = false
   end
 
+  def load(&block)
+    instance_eval(&block)
+  end
+
+  def item(name, &block)
+    item = Item.new(0, name, "", "")
+    item.load(&block)
+
+    @inventory << item if item
+  end
+
   def move_to(room)
     if @location
       @location.characters.delete self

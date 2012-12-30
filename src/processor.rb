@@ -26,7 +26,7 @@ class Processor
       raise "Keyword requires a block of code to be run with the command."
     end
 
-    add_command key, block
+    add_command key, &block
   end
 
   def alias(short, long)
@@ -34,7 +34,7 @@ class Processor
   end
 
   # Regular interface functions
-  def add_command(key, func)
+  def add_command(key, &func)
     @table.store key, func
   end
 
@@ -44,7 +44,7 @@ class Processor
 
   def add_alias(alias_key, command_key)
     if @table.has_key?(command_key)
-      add_command(alias_key, @table[command_key])
+      add_command(alias_key, &@table[command_key])
     end
   end
 

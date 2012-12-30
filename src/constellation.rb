@@ -9,9 +9,8 @@ require 'smart_colored/extend'
 @world = nil
 if ARGV.size == 1
   @path = ARGV.first
-  @file = eval(File.read(File.join(File.dirname(__FILE__), @path)))
-  @world = @file[:world]
-  @player = @file[:player]
+  @world = World.new(@path)
+  @player = @world.player
 else
   puts "WARNING: Enter a valid path to a save file.".red.bold
   puts
@@ -19,10 +18,8 @@ else
     print "> ".red.bold
     @path = $stdin.gets.chomp
     begin
-      @file = eval(File.read(File.join(File.dirname(__FILE__), @path)))
-      @world = @file[:world]
-      @player = @file[:player]
-      @player.player = true
+      @world = World.new(@path)
+      @player = @world.player
     rescue
       puts "Could not find a file at #{@path}".red.bold
     end

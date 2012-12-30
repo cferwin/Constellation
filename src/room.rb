@@ -13,6 +13,24 @@ class Room < Entity
     @exits = {}
   end
 
+  def load(&block)
+    instance_eval(&block)
+  end
+
+  def item(name, &block)
+    item = Item.new(0, name, "", "")
+    item.load(&block)
+
+    @items << item if item
+  end
+
+  def character(name, &block)
+    character = Character.new(0, name, "", "")
+    character.load(&block)
+
+    @characters << character if character
+  end
+
   def set_exit(direction, room)
     exits[direction] = room
   end

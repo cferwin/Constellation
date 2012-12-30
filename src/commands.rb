@@ -134,6 +134,16 @@ Processor.new do
   add_alias "q", "exit"
 
   keyword "save" do
-    @world.save(File.join(File.dirname(__FILE__), @line)) and exit
+    unless @line.empty?
+      @world.save(File.join(File.dirname(__FILE__), @line)) and exit
+    else
+      puts "Are you sure? This will overwrite your current save file".bold.red
+      print "yes/no> ".red.bold
+      confirm = $stdin.gets.chomp
+
+      if confirm.include? "y"
+        @world.save and exit
+      end
+    end
   end
 end
