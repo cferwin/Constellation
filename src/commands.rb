@@ -12,13 +12,16 @@ Processor.new do
   end
 
   keyword "look" do
-    puts("#{@player.location.name}".bold + "\n\n#{@player.location.long_desc}\n\n")
+    puts @player.location.name.bold
+    puts
+    puts @player.location.long_desc
+    puts
 
     # List items
     unless @player.location.items.empty?
-      puts("You see...")
+      puts "You see..." 
       @player.location.items.each do |item|
-        puts("#{item.name}".bold)
+        puts item.name.bold
       end
       puts
     end
@@ -26,13 +29,12 @@ Processor.new do
     # List exits
     puts  "You can exit:"
     @player.location.exits.each do |direction, room|
-      print("#{direction.to_s} ".bold)
+      print direction.to_s.bold + " "
     end
     puts
   end
   add_alias "l", "look"
 
-  # How should multiple items by one name be handled?
   keyword "take" do
     # No object name given
     if @line.empty?
