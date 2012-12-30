@@ -16,7 +16,7 @@ class World
     @characters = {}
     @items = {}
     @saved = []
-    @player = Character.new(0, "", "", "")
+    @player = Character.new("Player")
 
     if path
       instance_eval(File.read(File.join(File.dirname(__FILE__), path)))
@@ -50,8 +50,7 @@ class World
       id += 1
     end
 
-    room = Room.new(id, name, "", "")
-    room.load(&block)
+    room = Room.new(name, &block)
 
     add_room(room)
     room
@@ -75,13 +74,18 @@ class World
     rooms.delete id
   end
 
-  def create_room(id = 0, name, short_desc, long_desc)
+  def create_room(name)
+    id = 0
     while get_room(id) != nil
       # Try to find a free ID for the room
       id += 1
     end
 
-    get_room(add_room(Room.new(id, name, short_desc, long_desc)))
+    room = Room.new(name)
+    room.id = id
+
+    add_room(room)
+    room
   end
   
   # Characters
@@ -103,13 +107,18 @@ class World
     characters.delete id
   end
 
-  def create_character(id = 0, name, short_desc, long_desc)
+  def create_character(name)
+    id = 0
     while get_character(id) != nil
       # Try to find a free ID
       id += 1
     end
 
-    get_character(add_character(Character.new(0, name, short_desc, long_desc)))
+    character = Character.new(name)
+    character.id = id
+
+    add_character(character)
+    character
   end
 
   # Items
@@ -131,13 +140,18 @@ class World
     @items.delete id
   end
 
-  def create_item(id = 0, name, short_desc, long_desc)
+  def create_item(name)
+    id = 0
     while get_item(id) != nil
       # Try to find a free ID
       id += 1
     end
 
-    get_item(add_item(Item.new(0, name, short_desc, long_desc)))
+    item = Item.new(name)
+    item.id = id
+
+    add_item(item)
+    item
   end
 
   def save(path = nil)
@@ -203,7 +217,7 @@ class World
 
     string << "\tcharacter \"#{character.name}\" do\n"
       if character.player
-        string << "\t\tplayer = true\n"
+        string << "\t\t@player = true\n"
       end
       string << "\t\t@id = #{character.id}\n"
       string << "\t\t@short_desc = \"#{character.short_desc}\"\n"

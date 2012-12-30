@@ -1,25 +1,16 @@
-require_relative './entity'
+class Character
+  attr_accessor :id, :name, :short_desc, :long_desc, :inventory, :health, :location, :player
 
-class Character < Entity
-  attr_accessor :inventory, :health, :location, :player
-
-  def initialize(id, name, short_desc, long_desc)
-    @id = id
+  def initialize(name, &block)
     @name = name
-    @short_desc = short_desc
-    @long_desc = long_desc
     @inventory = []
     @health = 100
     @player = false
-  end
-
-  def load(&block)
-    instance_eval(&block)
+    instance_eval(&block) if block
   end
 
   def item(name, &block)
-    item = Item.new(0, name, "", "")
-    item.load(&block)
+    item = Item.new(name, &block)
 
     @inventory << item if item
   end

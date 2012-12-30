@@ -5,8 +5,8 @@ require_relative '../src/character'
 describe Character do
   before :all do
     @world = World.new
-    @character = @world.create_character("Test Char", "", "")
-    @room = @world.create_room("Test Room", "", "")
+    @character = @world.create_character("Test Char")
+    @room = @world.create_room("Test Room")
   end
 
   it 'can move to a room' do
@@ -16,7 +16,7 @@ describe Character do
   end
 
   it 'can move in a direction' do
-    @north = @world.create_room("North", "", "")
+    @north = @world.create_room("North")
     @room.set_exit :north, @north
 
     @character.location.should eq @room
@@ -29,7 +29,7 @@ describe Character do
   end
 
   it 'can take items' do
-    @room.items << @world.create_item("Test Item", "", "")
+    @room.items << @world.create_item("Test Item")
     @room.items.last.name.should eq "Test Item"
 
     @item = @character.take_item @room, "Test Item"

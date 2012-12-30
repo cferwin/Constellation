@@ -1,32 +1,22 @@
-require_relative './entity'
+class Room
+  attr_accessor :id, :name, :short_desc, :long_desc, :characters, :items, :exits
 
-class Room < Entity
-  attr_accessor :characters, :items, :exits
-
-  def initialize(id, name, short_desc, long_desc)
-    @id = id
+  def initialize(name, &block)
     @name = name
-    @short_desc = short_desc
-    @long_desc = long_desc
     @characters = []
     @items = []
     @exits = {}
-  end
-
-  def load(&block)
-    instance_eval(&block)
+    instance_eval(&block) if block
   end
 
   def item(name, &block)
-    item = Item.new(0, name, "", "")
-    item.load(&block)
+    item = Item.new(name, &block)
 
     @items << item if item
   end
 
   def character(name, &block)
-    character = Character.new(0, name, "", "")
-    character.load(&block)
+    character = Character.new(name, &block)
 
     @characters << character if character
   end

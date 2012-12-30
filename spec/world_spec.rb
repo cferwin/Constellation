@@ -8,25 +8,27 @@ describe World do
 
   describe "Rooms" do
     it 'can add rooms' do
-      @room = Room.new(5, "Test Room", "", "")
+      @room = Room.new("Test Room")
+      @room.id = 5
       @created_room = @world.add_room(@room)
+
       @room.id.should eq 5
       @created_room.should eq @room.id
     end
 
     it 'can create rooms' do
-      @room = @world.create_room(1, "Test Room", "A test room", "")
-      @room.id.should eq 1
+      @room = @world.create_room("Test Room")
+      @room.id.should eq 0
     end
 
     it 'can create rooms and find a free id' do
       @world.rooms.clear
 
-      @world.create_room(0, "Test Room", "A test room", "")
-      @world.create_room(1, "Test Room", "A test room", "")
-      @world.create_room(2, "Test Room", "A test room", "")
+      @world.create_room("Test Room")
+      @world.create_room("Test Room")
+      @world.create_room("Test Room")
 
-      @room = @world.create_room("Test Room", "A test room", "")
+      @room = @world.create_room("Test Room")
 
       @room.id.should eq 3
     end
@@ -44,17 +46,17 @@ describe World do
 
   describe "Characters" do
     it 'can create characters' do
-      @character = @world.create_character("Test Char", "", "")
+      @character = @world.create_character("Test Char")
       @character.name.should eq "Test Char"
     end
 
     it 'can get characters' do
-      @character = @world.create_character("Test Char", "", "")
+      @character = @world.create_character("Test Char")
       @world.get_character(@character.id).name.should eq "Test Char"
     end
 
     it 'can delete characters' do
-      @character = @world.create_character("Test Char", "", "")
+      @character = @world.create_character("Test Char")
       @id = @character.id
       @world.remove_character(@character.id)
       @world.get_character(@id).should eq nil
@@ -63,17 +65,17 @@ describe World do
 
   describe "Items" do
     it 'can create items' do
-      @item = @world.create_item("Test Item", "", "")
+      @item = @world.create_item("Test Item")
       @item.name.should eq "Test Item"
     end
 
     it 'can get items' do
-      @item = @world.create_item("Test Item", "", "")
+      @item = @world.create_item("Test Item")
       @world.get_item(@item.id).name.should eq "Test Item"
     end
 
     it 'can delete items' do
-      @item = @world.create_item("Test Item", "", "")
+      @item = @world.create_item("Test Item")
       @id = @item.id
       @world.remove_item(@item.id)
       @world.get_item(@id).should eq nil

@@ -1,9 +1,10 @@
-require_relative './entity'
+class Item
+  attr_accessor :id, :name, :short_desc, :long_desc
 
-class Item < Entity
-  attr_accessor :name, :short_desc, :long_desc, :parts, :durability
-
-  def load(&block)
-    instance_eval(&block)
+  def initialize(name, &block)
+    @name = name
+    @short_desc = short_desc
+    @long_desc = long_desc
+    instance_eval(&block) if block
   end
 end

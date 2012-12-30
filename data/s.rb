@@ -19,6 +19,7 @@ room "Road" do
 
 	# Room 0 Characters
 	character "Test Player" do
+		@player = true
 		@id = 0
 		@short_desc = "The player's description"
 		@long_desc = "The player's long description"
@@ -38,12 +39,6 @@ room "Road" do
 
 	end
 
-	character "" do
-		@id = 0
-		@short_desc = ""
-		@long_desc = ""
-	end
-
 	set_exit :north, 1
 end
 
@@ -51,14 +46,6 @@ room "North Hall" do
 	@id = 1
 	@short_desc = "You're standing at the end of a road..."
 	@long_desc = "You're standing at the end of a road..."
-
-	# Room 1 Characters
-	character "" do
-		@id = 0
-		@short_desc = ""
-		@long_desc = ""
-	end
-
 	set_exit :south, 0
 end
 
