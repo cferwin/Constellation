@@ -190,7 +190,7 @@ class World
       # Save room items
       unless room.items.empty?
         string << "\n# Room #{room.id} Items\n"
-        room.items.each do |item|
+        room.items.objects.each do |item|
           string << "#{save_item(item)}"
         end
       end
@@ -226,7 +226,7 @@ class World
     # Save inventory items
     unless character.inventory.empty?
       string << "\n\t# Inventory Items\n"
-      character.inventory.each do |item|
+      character.inventory.objects.each do |item|
         string << "#{save_item(item)}"
       end
     end
