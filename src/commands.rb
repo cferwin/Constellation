@@ -20,7 +20,7 @@ Processor.new do
     # List items
     unless @player.location.items.empty?
       puts "You see..." 
-      @player.location.items.each do |item|
+      @player.location.items.objects.each do |item|
         puts item.name.bold
       end
       puts
@@ -42,10 +42,10 @@ Processor.new do
       return
     end
 
-    if items = @player.take_item(@player.location, @line.join(" "))
-      # One item found by name, item successfully taken
+    if items = @player.take_item_by_name(@player.location.items, @line.join)
       if items.size == 1
-        puts "Picked up #{aoran @line.join(" ")}"
+        # One item found by name, item successfully taken
+        puts "Picked up #{aoran @line.join}"
       else
         # Multiple items found by name, specify by number in a list
         puts "Which one?"
@@ -53,6 +53,7 @@ Processor.new do
           puts "#{i} : #{items[i-1].name}".bold
         end
 
+        # Read an item number
         print "Item Number: "
         begin
           id = Integer($stdin.gets)
@@ -62,7 +63,7 @@ Processor.new do
         end
 
         # Item successfully taken
-        if @player.take_item_object(@player.location, items[id-1])
+        if @player.take_item(@player.location.items, items[id-1])
           puts "Picked up #{aoran @line.join(" ")}"
         else
           puts "Invalid number"
@@ -78,16 +79,16 @@ Processor.new do
   add_alias "g", "take"
 
   keyword "drop" do
-    # No item name given
+    # No object name given
     if @line.empty?
       puts "Drop what?"
       return
     end
 
-    if items = @player.drop_item(@line.join(" "))
-      # One item found by name, item successfully dropped
+    if items = @player.drop_item_by_name(@line.join)
       if items.size == 1
-        puts "Dropped #{aoran @line.join(" ")}"
+        # One item found by name, item successfully dropped
+        puts "Dropped #{aoran @line.join}"
       else
         # Multiple items found by name, specify by number in a list
         puts "Which one?"
@@ -95,6 +96,7 @@ Processor.new do
           puts "#{i} : #{items[i-1].name}".bold
         end
 
+        # Read an item number
         print "Item Number: "
         begin
           id = Integer($stdin.gets)
@@ -104,7 +106,7 @@ Processor.new do
         end
 
         # Item successfully dropped
-        if @player.drop_item_object(items[id-1])
+        if @player.move_item(@player.location.items, items[id-1])
           puts "Dropped #{aoran @line.join(" ")}"
         else
           puts "Invalid number"
@@ -112,7 +114,7 @@ Processor.new do
       end
     else
       # No item found by name
-      puts "I don't have #{aoran @line.join(" ")}"
+      puts "I don't see #{aoran @line.join(" ")}"
     end
   end
   add_alias "d", "drop"
@@ -122,7 +124,7 @@ Processor.new do
     if @player.inventory.empty?
       puts "You have nothing in your inventory."
     else
-      @player.inventory.each do |item|
+      @player.inventory.objects.each do |item|
         puts item.name
       end
     end

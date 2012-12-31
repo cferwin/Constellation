@@ -1,18 +1,22 @@
+require_relative './container'
+
 class Character
-  attr_accessor :id, :name, :short_desc, :long_desc, :inventory, :health, :location, :player
+  attr_accessor :id, :name, :short_desc, :long_desc, :health, :location, :player
+  attr_reader :inventory
 
   def initialize(name, &block)
     @name = name
-    @inventory = []
+    @inventory = Container.new
     @health = 100
     @player = false
+
     instance_eval(&block) if block
   end
 
   def item(name, &block)
     item = Item.new(name, &block)
 
-    @inventory << item if item
+    @inventory.add item if item
   end
 
   def move_to(room)
@@ -33,72 +37,51 @@ class Character
     end
   end
 
-  def take_item(container, name)
-    @ret = container.get_items_by_name(name)
+  def take_item_by_name(container, name)
+    items = container.find_by_name(name)
 
-    if @ret.nil?
-      return nil
+    if items
+      if items.size == 1
+        item = items.first
+
+        container.remove item
+        @inventory.add item
+      end
     end
 
-    if @ret.size == 1
-      item = @ret.first
+    items
+  end
 
-      container.remove_item item
-      @inventory << item
-      return @ret
-    else
-      @ret
+  def take_item(container, object)
+    container.remove object
+    @inventory.add object
+  end
+
+  def move_item_by_name(container, name)
+    items = @inventory.find_by_name(name)
+
+    if items
+      if items.size == 1
+        item = items.first
+
+        @inventory.remove item
+        container.add item
+      end
     end
+    
+    items
   end
 
-  def take_item_object(container, object)
-    container.remove_item object
-    @inventory << object
+  def move_item(container, object)
+    @inventory.remove object
+    container.add object
   end
 
-  def move_item_to(container, name)
-    @ret = get_items_by_name(name)
-
-    if @ret.nil?
-      return nil
-    end
-
-    if @ret.size == 1
-      item = @ret.first
-
-      move_item_to_object container, item
-      return @ret
-    else
-      @ret
-    end
+  def drop_item_by_name(name)
+    move_item_by_name(@location.items, name)
   end
 
-  def move_item_to_object(container, object)
-    @inventory.delete object
-    container.add_item object
-  end
-
-  def drop_item(name)
-    move_item_to(@location, name)
-  end
-
-  def drop_item_object(object)
-    move_item_to_object @location, object
-  end
-end
-
-def get_items_by_name(name)
-  @ret = []
-
-  @inventory.each do |item|
-    if item.name == name
-      @ret << item
-    end
-  end
-
-  if @ret.empty?
-    nil
-  else
-    @ret
+  def drop_item(object)
+    move_item(@location.items, object)
   end
 end

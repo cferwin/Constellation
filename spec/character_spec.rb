@@ -29,21 +29,21 @@ describe Character do
   end
 
   it 'can take items' do
-    @room.items << @world.create_item("Test Item")
-    @room.items.last.name.should eq "Test Item"
+    @room.items.add @world.create_item("Test Item")
+    @room.items.objects.last.name.should eq "Test Item"
 
-    @item = @character.take_item @room, "Test Item"
+    @item = @character.take_item_by_name @room.items, "Test Item"
     @item.should_not be_nil
-    @character.inventory.include?(@item.first).should be_true
+    @character.inventory.objects.include?(@item.first).should be_true
   end
 
   it 'can drop items' do
     @character.inventory.empty?.should_not be_true
-    @room.items.empty?.should be_true
+    @room.items.objects.empty?.should be_true
 
-    @character.move_item_to @room, "Test Item"
+    @character.move_item_by_name @room.items, "Test Item"
 
     @character.inventory.empty?.should be_true
-    @room.items.empty?.should_not be_true
+    @room.items.objects.empty?.should_not be_true
   end
 end
